@@ -38,9 +38,10 @@ bashio::log.info "Interfaces: $(printf '%s ' "${interfaces[@]}")"
 
 # Generate Samba configuration.
 jq ".interfaces = $(jq -c -n '$ARGS.positional' --args -- "${interfaces[@]}") |
-    .enabled_shares.[] |= ascii_downcase" /data/options.json \
+    .enabled_shares.[] |= ascii_downcase |
+    .ports = $(bashio::addon.network)" /data/options.json \
     | tempio \
-      -template /usr/share/tempio/smb.gtpl \
+      -template /usr/share/tempio/smb.conf.gtpl \
       -out /etc/samba/smb.conf
 
 # Init user

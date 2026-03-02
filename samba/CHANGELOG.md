@@ -1,5 +1,14 @@
 # Changelog
 
+## 12.6.1
+
+- Added `mdnsd` for macOS discoverability
+- Renamed `smb.conf` template for disambiguation with new templates
+- Added config option, and `nmbd` startup logic, to disable NetBIOS
+- Colocated mapped mounts to a `/smbshare` prefix to avoid potential confusion.
+- Updated `config.yaml` `map:` to new object syntax
+- Added config options to override default ports (445/139)
+
 ## 12.6.0
 
 - Do initial healthcheck after 3s to speedup startup

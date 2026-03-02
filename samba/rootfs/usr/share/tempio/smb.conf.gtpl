@@ -1,17 +1,29 @@
 [global]
    netbios name = {{ env "HOSTNAME" }}
+   dns hostname = {{ env "HOSTNAME" }}.local
+   additional dns hostnames = {{ env "HOSTNAME" }}._smb._tcp.local
    workgroup = {{ .workgroup }}
    server string = Samba Home Assistant
    local master = {{ .local_master | ternary "yes" "no" }}
+   preferred master = {{ .local_master | ternary "yes" "auto" }}
+   server role = standalone
+   server services = smb
+   smb ports = {{ index .ports "445/tcp" | default 445 }} {{ index .ports "139/tcp" | default 139 }}
 
    security = user
-   ntlm auth = yes
    idmap config * : backend = tdb
    idmap config * : range = 1000000-2000000
 
    load printers = no
    disable spoolss = yes
-
+   {{ if .netbios }}
+   disable netbios = no
+   server services = +nbt
+   {{ else }}
+   disable netbios = yes
+   {{ end }}
+   dns proxy = no
+   
    log level = 1
 
    bind interfaces only = yes
@@ -21,6 +33,10 @@
    {{ if .compatibility_mode }}
    client min protocol = NT1
    server min protocol = NT1
+   lanman auth = yes
+   ntlm auth = yes
+   {{ else }}
+   ntlm auth = no
    {{ end }}
 
    mangled names = no
@@ -32,12 +48,13 @@
    {{ end }}
 
    server signing = {{ .server_signing }}
+   allow dns updates = disabled
 
 {{ if (has "config" .enabled_shares) }}
 [config]
    browseable = yes
    writeable = yes
-   path = /homeassistant
+   path = /smbshare/homeassistant
 
    valid users = {{ .username }}
    force user = root
@@ -50,7 +67,7 @@
 [addons]
    browseable = yes
    writeable = yes
-   path = /addons
+   path = /smbshare/addons
 
    valid users = {{ .username }}
    force user = root
@@ -63,7 +80,7 @@
 [addon_configs]
    browseable = yes
    writeable = yes
-   path = /addon_configs
+   path = /smbshare/addon_configs
 
    valid users = {{ .username }}
    force user = root
@@ -76,7 +93,7 @@
 [ssl]
    browseable = yes
    writeable = yes
-   path = /ssl
+   path = /smbshare/ssl
 
    valid users = {{ .username }}
    force user = root
@@ -89,7 +106,7 @@
 [share]
    browseable = yes
    writeable = yes
-   path = /share
+   path = /smbshare/share
 
    valid users = {{ .username }}
    force user = root
@@ -102,7 +119,7 @@
 [backup]
    browseable = yes
    writeable = yes
-   path = /backup
+   path = /smbshare/backup
 
    valid users = {{ .username }}
    force user = root
@@ -115,7 +132,7 @@
 [media]
    browseable = yes
    writeable = yes
-   path = /media
+   path = /smbshare/media
 
    valid users = {{ .username }}
    force user = root

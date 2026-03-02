@@ -1,0 +1,5 @@
+#!/command/with-contenv bashio
+# vim: ft=bash
+# shellcheck shell=bash
+
+killall mdnsd
